@@ -14,17 +14,20 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <ScrollViewer x:Name="MessagesScrollBar">
-            <StackPanel x:Name="MessagesPanel" Grid.Row="0">
-            
-            </StackPanel>
+            <StackPanel x:Name="MessagesPanel" Grid.Row="0" />
         </ScrollViewer>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="11*"/>
+                <ColumnDefinition Width="10*"/>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBox x:Name="CurrentMessageText" Grid.Column="0" TextChanged="OnTextChanged" KeyDown="OnKeyPressed"/>
             <Button Grid.Column="1" Content=">>" Click="SendMessageBtn" />
+            <Button Grid.Column="2">
+                <Image MaxWidth="30" MaxHeight="20" Source="/Pages/attachment.png" Stretch="Fill" StretchDirection="DownOnly"/>
+
+            </Button>
         </Grid>
     </Grid>
 </Page>

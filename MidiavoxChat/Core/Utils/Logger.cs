@@ -11,7 +11,7 @@ namespace MidiavoxChat.Core.Utils
         private static readonly Object _appendLock = new Object();
         static Logger()
         {
-            var result = System.IO.Directory.CreateDirectory("logs");
+            System.IO.Directory.CreateDirectory("logs");
         }
         public static void Log(string message)
         {

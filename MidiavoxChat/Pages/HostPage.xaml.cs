@@ -25,7 +25,7 @@ namespace MidiavoxChat.Pages
     {
 
         public delegate void ShowIpCallback(string message);
-        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         public HostPage()
         {
             InitializeComponent();

@@ -62,7 +62,6 @@ namespace MidiavoxChat.Core
             {
                 httpListener.Start();
                 Logger.Log($"{ClassName}: {functionName} -- Trying to listen on port {port}");
-
                 HttpListenerContext context = await httpListener.GetContextAsync();
                 Logger.Log($"{ClassName}: {functionName} -- Received request with context: {context.Request.ToString()}");
                 if (context.Request.IsWebSocketRequest)
@@ -86,9 +85,15 @@ namespace MidiavoxChat.Core
             }
         }
 
+        /// <summary>
+        /// Stop the Http server responsible for responding to websocket connection attempts
+        /// </summary>
         public static void StopServer()
         {
-            httpListener.Stop();
+            if (httpListener != null)
+            {
+                httpListener.Stop();
+            }
         }
     }
 }

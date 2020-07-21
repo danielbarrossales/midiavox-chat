@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,12 +23,23 @@ namespace MidiavoxChat.Pages
     public partial class ChatPage : Page
     {
         private MessageHandler _messageHandler;
+        private CancellationTokenSource cancelationTokenSource = new CancellationTokenSource();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="webSocket">Web Socket with connection status of type open, that will be used in the chat</param>
         public ChatPage(WebSocket webSocket)
         {
             InitializeComponent();
-            _messageHandler = new MessageHandler(webSocket, new MessageHandler.ReceivedMessageDelegate(ReceivedMessage));   
+            _messageHandler = new MessageHandler(webSocket, new MessageHandler.ReceivedMessageDelegate(ReceivedMessage));
+            DownTimeMessage();
         }
 
+        /// <summary>
+        /// Ensures that the text has no more than a 100 characteres
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnTextChanged(object sender, TextChangedEventArgs e)
         {
             if (CurrentMessageText.Text.Length > 100)
@@ -37,10 +49,15 @@ namespace MidiavoxChat.Pages
             }
         }
 
-        private void SendCurrentMessage()
+        /// <summary>
+        /// Tries to send the message through the websocket connection
+        /// if it fails cleans up and send user back to the starting page
+        /// Cancel any DownTimeMessage and starts another one whenever is called
+        /// </summary>
+        private void SendMessage(string messageToSend)
         {
-            string message = CurrentMessageText.Text;
-            CurrentMessageText.Text = "";
+            cancelationTokenSource.Cancel();
+            string message = messageToSend;
             Task.Run(async () => 
             {
                 var sendMessageTask = await _messageHandler.SendMessage(message);
@@ -49,6 +66,8 @@ namespace MidiavoxChat.Pages
                     this.Dispatcher.Invoke(() =>
                     {
                         this.UpdateMessageHistory(message, false);
+                        cancelationTokenSource = new CancellationTokenSource();
+                        this.DownTimeMessage();
                     });
                 }
                 else 
@@ -61,12 +80,21 @@ namespace MidiavoxChat.Pages
             });
         }
         
+        /// <summary>
+        /// Clean up before exiting page
+        /// </summary>
         private void WsConnectionClosed()
         {
             MessageBox.Show("Connection was closed");
+            WebSocketConnectionHandler.StopServer();
             this.NavigationService.Navigate(new StartingPage());
         }
 
+        /// <summary>
+        /// Method that create objects to display the received and send messages
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="received">If true assumes the message was received from the websocket and align the message to the left</param>
         private void UpdateMessageHistory(string message, bool received)
         {
             var labelMessage = new Label();
@@ -83,6 +111,10 @@ namespace MidiavoxChat.Pages
             MessagesScrollBar.ScrollToEnd();
         }
 
+        /// <summary>
+        /// Method that handles an incoming message
+        /// </summary>
+        /// <param name="message"></param>
         private void ReceivedMessage(string message)
         {
             this.Dispatcher.Invoke(() =>
@@ -93,15 +125,37 @@ namespace MidiavoxChat.Pages
 
         private void SendMessageBtn(object sender, RoutedEventArgs e)
         {
-            SendCurrentMessage();
+            SendMessage(CurrentMessageText.Text);
+            CurrentMessageText.Text = "";
         }
 
         private void OnKeyPressed(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                SendCurrentMessage();
+                SendMessage(CurrentMessageText.Text);
+                CurrentMessageText.Text = "";
             }
         }
+
+
+        /// <summary>
+        /// Send the date and year after 60000 seconds
+        /// </summary>
+        private void DownTimeMessage()
+        {
+            var cancellationToken = cancelationTokenSource.Token;
+            Task.Run(async () => 
+            {
+                await Task.Delay(60000);
+                cancellationToken.ThrowIfCancellationRequested();
+                this.Dispatcher.Invoke(()=>
+                {
+                    var time = DateTime.Now;
+                    this.SendMessage($"{time.Day}/{time.Month}/{time.Year} - {time.Hour}:{time.Minute}:{time.Second}");
+                });
+            }, cancellationToken);
+        }
+
     }
 }

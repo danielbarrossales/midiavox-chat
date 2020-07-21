@@ -19,12 +19,14 @@ namespace MidiavoxChat.Core
         /// <param name="message">Received message</param>
         public delegate void ReceivedMessageDelegate(string message);
 
-        /// <summary>
-        /// Delegate will be called everytime the websocket receives a message
-        /// </summary>
         private ReceivedMessageDelegate ReceivedMessage { get; set; }
         private WebSocket _webSocket;
         private readonly string ClassName = "MessagesHandler";
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="webSocket">WebSocket with open connection that will be used by the object</param>
+        /// <param name="receivedMessageDelegate">Will be called everytime the websocket receives a message of text type</param>        
         public MessageHandler(WebSocket webSocket, ReceivedMessageDelegate receivedMessageDelegate)
         {
             _webSocket = webSocket;
@@ -59,7 +61,12 @@ namespace MidiavoxChat.Core
             return false;
         }
 
-        public async Task ReceiveMessage()
+        /// <summary>
+        /// Will run for as long as the Web Socket connection is up
+        /// Calls a delegate function everytime it receives a text message.
+        /// </summary>
+        /// <returns></returns>
+        private async Task ReceiveMessage()
         {
             var functionName = "ReceiveMessage";
             while (_webSocket.State == WebSocketState.Open)
