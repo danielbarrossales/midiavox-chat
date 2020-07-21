@@ -1,11 +1,13 @@
+﻿using MidiavoxChat.Core.Utils;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using midiavox_chat.Utils;
 
-namespace midiavox_chat
+namespace MidiavoxChat.Core
 {
     /// <summary>
     /// Class responsible for handling websocket connection
@@ -13,6 +15,8 @@ namespace midiavox_chat
     public static class WebSocketConnectionHandler
     {
         static string ClassName = "ConnectionHandler";
+        private static HttpListener httpListener;
+
         /// <summary>
         /// Try to connect to websocket
         /// </summary>
@@ -50,33 +54,41 @@ namespace midiavox_chat
         public static async Task<WebSocket> ListenToWSConnectionAsync(string port)
         {
             string functionName = "WaitIpConnectAsync";
-            Logger.Log($"{ClassName}: {functionName} -- Trying to listen on port {port}");
-            HttpListener httpListener = new HttpListener();
+            httpListener = new HttpListener();
             httpListener.Prefixes.Add("http://localhost:" + port + "/");
+            httpListener.Prefixes.Add("http://127.0.0.1:" + port + "/");
+            httpListener.Prefixes.Add("http://*:" + port + "/");
             try
             {
                 httpListener.Start();
-                while (true)
+                Logger.Log($"{ClassName}: {functionName} -- Trying to listen on port {port}");
+
+                HttpListenerContext context = await httpListener.GetContextAsync();
+                Logger.Log($"{ClassName}: {functionName} -- Received request with context: {context.Request.ToString()}");
+                if (context.Request.IsWebSocketRequest)
                 {
-                    HttpListenerContext context = await httpListener.GetContextAsync();
-                    if (context.Request.IsWebSocketRequest)
+                    HttpListenerWebSocketContext webSocketContext = await context.AcceptWebSocketAsync(null);
+                    var webSocket = webSocketContext.WebSocket;
+                    if (webSocket.State == WebSocketState.Open)
                     {
-                        HttpListenerWebSocketContext webSocketContext = await context.AcceptWebSocketAsync(null);
-                        var webSocket = webSocketContext.WebSocket;
-                        if (webSocket.State == WebSocketState.Open)
-                        {
-                            Logger.Log($"{ClassName}: {functionName} -- Connection made on port {port}");
-                            return webSocket;
-                        }
+                        Logger.Log($"{ClassName}: {functionName} -- Connection made on port {port}");
+                        return webSocket;
                     }
                 }
+                StopServer();
+                return null;
             }
             catch (Exception e)
             {
-                Logger.Log($"{ClassName}: {functionName} -- Error while listening on port {port}: {e.Message}");
-                httpListener.Abort();
+                Logger.Log($"{ClassName}: {functionName} -- Error while listening on port {port}: {e.GetType()} | {e.Message}");
+                StopServer();
                 return null;
             }
+        }
+
+        public static void StopServer()
+        {
+            httpListener.Stop();
         }
     }
 }

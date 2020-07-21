@@ -1,13 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Text;
 
-namespace midiavox_chat.Utils
+namespace MidiavoxChat.Core.Utils
 {
     public static class NetworkUtils
     {
         /// <summary>
         /// Got this method from https://www.c-sharpcorner.com/forums/how-to-get-local-machine-ip-address-in-net-core-22
+        /// It will browse through the network interfaces and filter for a ip
         /// </summary>
         /// <returns>Most suitable IP of local network</returns>
         public static string GetLocalIpAddress()

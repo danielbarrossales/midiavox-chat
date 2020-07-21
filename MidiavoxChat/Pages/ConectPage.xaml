@@ -1,0 +1,36 @@
+﻿<Page x:Class="MidiavoxChat.Pages.ConnectToPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:MidiavoxChat.Pages"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="ConectPage">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="11*" />
+        </Grid.RowDefinitions>
+        <Button Grid.Row="0" Content="Voltar" Margin="5 0 5 0" MinWidth="45" Click="BackToStartingPage" MaxHeight="40" VerticalAlignment="Top" HorizontalAlignment="Left">
+            <Button.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="4"/>
+                </Style>
+            </Button.Resources>
+        </Button>
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10 0 10 50">
+            <Label HorizontalAlignment="Center" FontSize="18" Content="Entre com o ip cujo qual deseja se conectar" Margin="0 0 0 10"/>
+            <TextBox x:Name="IpTextBox" MinWidth="300" FontSize="20" Margin="0 0 0 10" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" KeyDown="OnIpTextKeyDown">
+            </TextBox>
+            <Button Content="Conectar-se" FontSize="18" MaxWidth="200" Margin="0 0 0 10" Click="OnConnectButtonClick" >
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="10"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Page>
