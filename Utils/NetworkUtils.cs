@@ -2,9 +2,9 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
-namespace midiavox_chat
+namespace midiavox_chat.Utils
 {
-    public static class Utils
+    public static class NetworkUtils
     {
         /// <summary>
         /// Got this method from https://www.c-sharpcorner.com/forums/how-to-get-local-machine-ip-address-in-net-core-22
