@@ -10,7 +10,7 @@ namespace midiavox_chat
     /// <summary>
     /// Class responsible for handling websocket connection
     /// </summary>
-    public class ConnectionHandler
+    public static class WebSocketConnectionHandler
     {
         static string ClassName = "ConnectionHandler";
         /// <summary>
@@ -19,7 +19,7 @@ namespace midiavox_chat
         /// <param name="ip">Ip address of the target client</param>
         /// <param name="port">Port on which the client is listening</param>
         /// <returns>Return a websocket with open connection, if it couldn't connect returns null</returns>
-        public async Task<WebSocket> WaitIpToConnectAsync(string ip, string port)
+        public static async Task<WebSocket> WaitIpToConnectAsync(string ip, string port)
         {
             string functionName = "WaitIpConnectAsync";
             ClientWebSocket webSocket = new ClientWebSocket();
@@ -47,7 +47,7 @@ namespace midiavox_chat
         /// </summary>
         /// <param name="port">The port on which the server will listen</param>
         /// <returns>Returns an websocket with open connection, returns null if it couldn't listen for a connection</returns>
-        public async Task<WebSocket> ListenToWSConnectionAsync(string port)
+        public static async Task<WebSocket> ListenToWSConnectionAsync(string port)
         {
             string functionName = "WaitIpConnectAsync";
             Logger.Log($"{ClassName}: {functionName} -- Trying to listen on port {port}");
