@@ -11,57 +11,61 @@ namespace midiavox_chat
     /// </summary>
     public class ConnectionHandler
     {
-        public WebSocket[] sockets = new WebSocket[2];
-
         /// <summary>
-        /// Waits for a client to connect with this program or for the user to enter an ip to create a connection with
+        /// Try to connect to websocket
         /// </summary>
-        /// <returns>Returns a websocket with a open connection</returns>
-        public WebSocket GetWebSocketConnected()
+        /// <param name="ip">Ip address of the target client</param>
+        /// <param name="port">Port on which the client is listening</param>
+        /// <returns>Return a websocket with open connection, if it couldn't connect returns null</returns>
+        public async Task<WebSocket> WaitIpToConnectAsync(string ip, string port)
         {
-            var tokenSource = new CancellationTokenSource();
-            var token = tokenSource.Token;
-            var connectionTasks = new Task[] { Task.Run(() => ListenToWSConnectionAsync()), Task.Run(() => WaitIpToConnectAsync()) };
-            var connectionIndex = Task.WaitAny(connectionTasks, token);
-            tokenSource.Cancel();
-            return sockets[connectionIndex];
-        }
-        private async Task<bool> WaitIpToConnectAsync()
-        {
-            var ip = Console.ReadLine();
             ClientWebSocket webSocket = new ClientWebSocket();
-            await webSocket.ConnectAsync(new Uri("ws://" + ip + ":8080/"), CancellationToken.None);
-            if (webSocket.State == WebSocketState.Open)
+            while (webSocket.State != WebSocketState.Open)
             {
-                sockets[1] = webSocket;
-                return true;
+                try
+                {
+                    await webSocket.ConnectAsync(new Uri("ws://" + ip + ":" + port + "/"), CancellationToken.None);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    webSocket.Abort();
+                    return null;
+                }
             }
-            else {
-                Console.WriteLine("Connection Handler: Unable to connect with that ip");
-                return await WaitIpToConnectAsync();
-            }
-            
+            Console.WriteLine(webSocket.State);
+            return webSocket;
         }
-        private async Task<bool> ListenToWSConnectionAsync()
+        /// <summary>
+        /// Listen for another clients connection
+        /// </summary>
+        /// <param name="port">The port on which the server will listen</param>
+        /// <returns>Returns an websocket with open connection, returns null if it couldn't listen for a connection</returns>
+        public async Task<WebSocket> ListenToWSConnectionAsync(string port)
         {
             HttpListener httpListener = new HttpListener();
-            httpListener.Prefixes.Add("http://localhost:8080/");
-            httpListener.Start();
-
-            while (true)
+            httpListener.Prefixes.Add("http://localhost:" + port + "/");
+            try
             {
-                HttpListenerContext context = await httpListener.GetContextAsync();
-                if (context.Request.IsWebSocketRequest)
+                httpListener.Start();
+                while (true)
                 {
-                    HttpListenerWebSocketContext webSocketContext = await context.AcceptWebSocketAsync(null);
-                    var webSocket = webSocketContext.WebSocket;
-                    if (webSocket.State == WebSocketState.Open)
+                    HttpListenerContext context = await httpListener.GetContextAsync();
+                    if (context.Request.IsWebSocketRequest)
                     {
-                        sockets[1] = webSocketContext.WebSocket;
-                        return true;
+                        HttpListenerWebSocketContext webSocketContext = await context.AcceptWebSocketAsync(null);
+                        var webSocket = webSocketContext.WebSocket;
+                        if (webSocket.State == WebSocketState.Open)
+                        {
+                            return webSocket;
+                        }
                     }
-                    continue;
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
             }
         }
     }
