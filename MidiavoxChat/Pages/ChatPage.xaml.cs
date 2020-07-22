@@ -1,4 +1,5 @@
-﻿using MidiavoxChat.Core;
+﻿using Microsoft.Win32;
+using MidiavoxChat.Core;
 using System;
 using System.Collections.Generic;
 using System.Net.WebSockets;
@@ -31,7 +32,7 @@ namespace MidiavoxChat.Pages
         public ChatPage(WebSocket webSocket)
         {
             InitializeComponent();
-            _messageHandler = new MessageHandler(webSocket, new MessageHandler.ReceivedMessageDelegate(ReceivedMessage));
+            _messageHandler = new MessageHandler(webSocket, new MessageHandler.ReceivedMessageDelegate(ReceivedMessage), new MessageHandler.ReceivedImageDelegate(ReceivedImage));
             DownTimeMessage();
         }
 
@@ -111,6 +112,23 @@ namespace MidiavoxChat.Pages
             MessagesScrollBar.ScrollToEnd();
         }
 
+        private void UpdateMessageHistory(byte[] imageByteArray, bool received)
+        {            
+            var image = new Image();
+            image.Source = (ImageSource) new ImageSourceConverter().ConvertFrom(imageByteArray);
+            image.MaxWidth = 300;
+            if (received)
+            {
+                image.HorizontalAlignment = HorizontalAlignment.Left;
+            }
+            else
+            {
+                image.HorizontalAlignment = HorizontalAlignment.Right;
+            }
+            MessagesPanel.Children.Add(image);
+            MessagesScrollBar.ScrollToEnd();
+        }
+
         /// <summary>
         /// Method that handles an incoming message
         /// </summary>
@@ -120,6 +138,14 @@ namespace MidiavoxChat.Pages
             this.Dispatcher.Invoke(() =>
             {
                 UpdateMessageHistory(message, true);
+            });
+        }
+
+        private void ReceivedImage(byte[] image)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                UpdateMessageHistory(image, true);
             });
         }
 
@@ -157,5 +183,20 @@ namespace MidiavoxChat.Pages
             }, cancellationToken);
         }
 
+        private void LoadFileBtn(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Arquivos de Imagens (*.jpg)|*.jpg";
+            openFileDialog.ShowDialog();
+
+            this.NavigationService.Navigate(new ConfirmImage(new Uri(openFileDialog.FileName), this));
+        }
+
+        public async void SendFile(byte[] image)
+        {
+
+            await _messageHandler.SendImage(image);
+            UpdateMessageHistory(image, false);
+        }
     }
 }
