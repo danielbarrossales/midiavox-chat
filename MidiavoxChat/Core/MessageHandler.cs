@@ -125,7 +125,7 @@ namespace MidiavoxChat.Core
 
                     Logger.Log($"{ClassName}: {functionName} -- Received Image with length = {image.Length}");
 
-                    ReceivedImage(image);
+                    ReceivedImage(buffer);
                 }
             }
             Logger.Log($"{ClassName}: {functionName} -- Connection closed");
