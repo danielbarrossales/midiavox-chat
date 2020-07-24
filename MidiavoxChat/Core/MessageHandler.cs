@@ -103,7 +103,7 @@ namespace MidiavoxChat.Core
             var functionName = "ReceiveMessage";
             while (_webSocket.State == WebSocketState.Open)
             {
-                var buffer = new Byte[5000000];
+                var buffer = new Byte[16384];
                 var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 if (result.MessageType == WebSocketMessageType.Text)
                 {
@@ -112,20 +112,23 @@ namespace MidiavoxChat.Core
                 }
                 if (result.MessageType == WebSocketMessageType.Binary)
                 {
-                    int i = buffer.Length - 1;
-                    for (; buffer[i] == 0; i--) { }
-
-                    i += 1;
-                    var image = new Byte[i];
-
-                    for(int j = 0; j < i; j++)
+                    List<byte> image = new List<byte>();
+                    while(!result.EndOfMessage)
                     {
-                        image[j] = buffer[j];
+                        foreach(var b in buffer)
+                        {
+                            image.Add(b);
+                        }
+                        result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    }
+                    foreach (var b in buffer)
+                    {
+                        image.Add(b);
                     }
 
-                    Logger.Log($"{ClassName}: {functionName} -- Received Image with length = {image.Length}");
+                    Logger.Log($"{ClassName}: {functionName} -- Received Image with length = {image.Count}");
 
-                    ReceivedImage(buffer);
+                    ReceivedImage(image.ToArray());
                 }
             }
             Logger.Log($"{ClassName}: {functionName} -- Connection closed");

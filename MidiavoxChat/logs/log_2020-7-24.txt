@@ -1,0 +1,10 @@
+19:42:33 - ConnectionHandler: WaitIpConnectAsync -- Trying to connect on ws://192.168.0.103:8080/
+19:42:33 - ConnectionHandler: WaitIpConnectAsync -- Connected on ws://192.168.0.103:8080/
+19:42:49 - MessagesHandler: SendMessage -- Message Sent
+19:42:49 - MessagesHandler: SendMessage -- Trying to send Message
+19:42:51 - MessagesHandler: SendMessage -- Trying to send Message
+19:42:51 - MessagesHandler: SendMessage -- Message Sent
+19:42:52 - MessagesHandler: SendMessage -- Trying to send Message
+19:42:52 - MessagesHandler: SendMessage -- Message Sent
+19:42:59 - MessagesHandler: SendMessage -- Trying to send Message
+19:42:59 - MessagesHandler: SendMessage -- Connection closed
