@@ -33,3 +33,4 @@ msbuild.wrn
 logs/*
 MidiavoxChat/[Bb]in/
 MidiavoxChat/[Oo]in/
+MidiavoxChat/logs
