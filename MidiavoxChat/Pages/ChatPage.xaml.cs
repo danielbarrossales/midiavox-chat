@@ -192,10 +192,16 @@ namespace MidiavoxChat.Pages
             this.NavigationService.Navigate(new ConfirmImage(new Uri(openFileDialog.FileName), this));
         }
 
+        /// <summary>
+        /// Sends image and resets DownTimeCounter
+        /// </summary>
+        /// <param name="image">Image as a byte array</param>
         public async void SendFile(byte[] image)
         {
-
+            cancelationTokenSource.Cancel();
             await _messageHandler.SendImage(image);
+            cancelationTokenSource = new CancellationTokenSource();
+            this.DownTimeMessage();
             UpdateMessageHistory(image, false);
         }
     }

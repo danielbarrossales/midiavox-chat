@@ -103,6 +103,7 @@ namespace MidiavoxChat.Core
             var functionName = "ReceiveMessage";
             while (_webSocket.State == WebSocketState.Open)
             {
+                /// For some reason tha websocket breaks the data into packages of 16384 bytes
                 var buffer = new Byte[16384];
                 var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 if (result.MessageType == WebSocketMessageType.Text)
@@ -112,6 +113,11 @@ namespace MidiavoxChat.Core
                 }
                 if (result.MessageType == WebSocketMessageType.Binary)
                 {
+                    /**
+                     * Since the text with 100 characters will never have to be splited we only need to worry about binary dada, our images.
+                     * Creates a list to gold all packages, and then loop through all packages untill it receives one that is marked as
+                     * EndOfMessage.
+                     */
                     List<byte> image = new List<byte>();
                     while(!result.EndOfMessage)
                     {
